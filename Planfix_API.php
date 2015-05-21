@@ -14,7 +14,8 @@
 /**
  * Exception overriding for better catchability.
  */
-class Planfix_API_Exception extends Exception {}
+class Planfix_API_Exception extends Exception {
+}
 
 /**
  * Main class with all the magic.
@@ -40,11 +41,11 @@ class Planfix_API {
      * Default Curl options
      */
     public static $CURL_OPTS = array(
-        CURLOPT_CONNECTTIMEOUT    => 10,
-        CURLOPT_RETURNTRANSFER    => 1,
-        CURLOPT_TIMEOUT           => 60,
-        CURLOPT_SSL_VERIFYPEER    => 0,
-        CURLOPT_SSL_VERIFYHOST    => 0
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_TIMEOUT        => 60,
+        CURLOPT_SSL_VERIFYPEER => 0,
+        CURLOPT_SSL_VERIFYHOST => 0
     );
 
     /**
@@ -103,19 +104,21 @@ class Planfix_API {
      *
      * @param array $config The array containing required parameters
      */
-    public function __construct($config) {
-        $this->setApiKey($config['apiKey']);
-        $this->setApiSecret($config['apiSecret']);
+    public function __construct( $config ) {
+        $this->setApiKey( $config['apiKey'] );
+        $this->setApiSecret( $config['apiSecret'] );
     }
 
     /**
      * Set the Api key
      *
      * @param string $apiKey Api key
+     *
      * @return Planfix_API
      */
-    public function setApiKey($apiKey) {
+    public function setApiKey( $apiKey ) {
         $this->apiKey = $apiKey;
+
         return $this;
     }
 
@@ -132,10 +135,12 @@ class Planfix_API {
      * Set the Api secret
      *
      * @param string $apiKey Api secret
+     *
      * @return Planfix_API
      */
-    public function setApiSecret($apiSecret) {
+    public function setApiSecret( $apiSecret ) {
         $this->apiSecret = $apiSecret;
+
         return $this;
     }
 
@@ -152,10 +157,12 @@ class Planfix_API {
      * Set the Account
      *
      * @param string $account Account
+     *
      * @return Planfix_API
      */
-    public function setAccount($account) {
+    public function setAccount( $account ) {
         $this->account = $account;
+
         return $this;
     }
 
@@ -177,19 +184,21 @@ class Planfix_API {
      *
      * @param array $user The array containing required parameters
      */
-    public function setUser($user) {
-        $this->setUserLogin($user['login']);
-        $this->setUserPassword($user['password']);
+    public function setUser( $user ) {
+        $this->setUserLogin( $user['login'] );
+        $this->setUserPassword( $user['password'] );
     }
 
     /**
      * Set the User login
      *
      * @param string $userLogin User login
+     *
      * @return Planfix_API
      */
-    public function setUserLogin($userLogin) {
+    public function setUserLogin( $userLogin ) {
         $this->userLogin = $userLogin;
+
         return $this;
     }
 
@@ -206,10 +215,12 @@ class Planfix_API {
      * Set the User password
      *
      * @param string $userPassword User password
+     *
      * @return Planfix_API
      */
-    public function setUserPassword($userPassword) {
+    public function setUserPassword( $userPassword ) {
         $this->userPassword = $userPassword;
+
         return $this;
     }
 
@@ -227,10 +238,12 @@ class Planfix_API {
      * Set the Sid
      *
      * @param string $sid Sid
+     *
      * @return Planfix_API
      */
-    public function setSid($sid) {
+    public function setSid( $sid ) {
         $this->sid = $sid;
+
         return $this;
     }
 
@@ -250,29 +263,29 @@ class Planfix_API {
      * @return Planfix_API
      */
     public function authenticate() {
-        $userLogin = $this->getUserLogin();
+        $userLogin    = $this->getUserLogin();
         $userPassword = $this->getUserPassword();
 
-        if (!($userLogin && $userPassword)) {
-            throw new Planfix_API_Exception('User credentials are not set');
+        if ( ! ( $userLogin && $userPassword ) ) {
+            throw new Planfix_API_Exception( 'User credentials are not set' );
         }
 
         $requestXml = $this->createXml();
 
         $requestXml['method'] = 'auth.login';
 
-        $requestXml->login = $userLogin;
+        $requestXml->login    = $userLogin;
         $requestXml->password = $userPassword;
 
-        $requestXml->signature = $this->signXml($requestXml);
+        $requestXml->signature = $this->signXml( $requestXml );
 
-        $response = $this->makeRequest($requestXml);
+        $response = $this->makeRequest( $requestXml );
 
-        if (!$response['success']) {
-            throw new Planfix_API_Exception('Unable to authenticate: '.$response['error_str']);
+        if ( ! $response['success'] ) {
+            throw new Planfix_API_Exception( 'Unable to authenticate: ' . $response['error_str'] );
         }
 
-        $this->setSid($response['data']['sid']);
+        $this->setSid( $response['data']['sid'] );
 
         return $this;
     }
@@ -282,20 +295,21 @@ class Planfix_API {
      *
      * @param string|array $method Api method to be called or group of methods for batch request
      * @param array $params (optional) Parameters for called Api method
+     *
      * @throws Planfix_API_Exception
      * @return array the Api response
      */
-    public function api($method, $params = '') {
-        if (!$method) {
-            throw new Planfix_API_Exception('No method specified');
-        } elseif (is_array($method)) {
-            if (isset($method['method'])) {
-                $params = isset($method['params']) ? $method['params'] : '';
+    public function api( $method, $params = '' ) {
+        if ( ! $method ) {
+            throw new Planfix_API_Exception( 'No method specified' );
+        } elseif ( is_array( $method ) ) {
+            if ( isset( $method['method'] ) ) {
+                $params = isset( $method['params'] ) ? $method['params'] : '';
                 $method = $method['method'];
             } else {
-                foreach($method as $request) {
-                    if (!isset($request['method'])) {
-                        throw new Planfix_API_Exception('No method specified');
+                foreach ( $method as $request ) {
+                    if ( ! isset( $request['method'] ) ) {
+                        throw new Planfix_API_Exception( 'No method specified' );
                     }
                 }
             }
@@ -303,53 +317,53 @@ class Planfix_API {
 
         $sid = $this->getSid();
 
-        if (!$sid) {
+        if ( ! $sid ) {
             $this->authenticate();
             $sid = $this->getSid();
         }
 
-        if (is_array($method)) {
+        if ( is_array( $method ) ) {
             $batch = array();
 
-            foreach($method as $request) {
+            foreach ( $method as $request ) {
                 $requestXml = $this->createXml();
 
                 $requestXml['method'] = $request['method'];
-                $requestXml->sid = $sid;
+                $requestXml->sid      = $sid;
 
-                $params = isset($request['params']) ? $request['params'] : '';
+                $params = isset( $request['params'] ) ? $request['params'] : '';
 
-                if (is_array($params) && $params) {
-                    $this->importParams($requestXml, $params);
+                if ( is_array( $params ) && $params ) {
+                    $this->importParams( $requestXml, $params );
                 }
 
-                if (!isset($requestXml->pageSize)) {
+                if ( ! isset( $requestXml->pageSize ) ) {
                     $requestXml->pageSize = self::MAX_PAGE_SIZE;
                 }
 
-                $requestXml->signature = $this->signXml($requestXml);
+                $requestXml->signature = $this->signXml( $requestXml );
 
                 $batch[] = $requestXml;
             }
 
-            return $this->makeBatchRequest($batch);
+            return $this->makeBatchRequest( $batch );
         } else {
             $requestXml = $this->createXml();
 
             $requestXml['method'] = $method;
-            $requestXml->sid = $sid;
+            $requestXml->sid      = $sid;
 
-            if (is_array($params) && $params) {
-                $this->importParams($requestXml, $params);
+            if ( is_array( $params ) && $params ) {
+                $this->importParams( $requestXml, $params );
             }
 
-            if (!isset($requestXml->pageSize)) {
+            if ( ! isset( $requestXml->pageSize ) ) {
                 $requestXml->pageSize = self::MAX_PAGE_SIZE;
             }
 
-            $requestXml->signature = $this->signXml($requestXml);
+            $requestXml->signature = $this->signXml( $requestXml );
 
-            return $this->makeRequest($requestXml);
+            return $this->makeRequest( $requestXml );
         }
     }
 
@@ -360,12 +374,12 @@ class Planfix_API {
      * @return SimpleXMLElement the XML request
      */
     protected function createXml() {
-        $requestXml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><request></request>');
+        $requestXml = new SimpleXMLElement( '<?xml version="1.0" encoding="UTF-8"?><request></request>' );
 
         $account = $this->getAccount();
 
-        if (!$account) {
-            throw new Planfix_API_Exception('Account is not set');
+        if ( ! $account ) {
+            throw new Planfix_API_Exception( 'Account is not set' );
         }
 
         $requestXml->account = $account;
@@ -378,54 +392,55 @@ class Planfix_API {
      *
      * @param SimpleXMLElement The XML request
      * @param array Parameters
+     *
      * @return SimpleXMLElement the XML request
      */
-    protected function importParams($requestXml, $params) {
-        foreach($params as $key => $val) {
-            if (is_array($val)) {
-                $requestXml->$key = new SimpleXMLElement("<$key/>");
-                foreach($val as $key2 => $val2) {
-                    if (is_array($val2)) {
-                        $this->importParams($requestXml->$key, $val2);
-                    } else {
-                        $requestXml->$key->addChild($key2, $val2);
-                    }
+    protected function importParams( &$xml, $data ) {
+        foreach ( $data as $key => $value ) {
+            if ( is_array( $value ) ) {
+                if ( ! is_numeric( $key ) ) {
+                    $subnode = $xml->addChild( "$key" );
+                    $this->importParams( $subnode, $value );
+                } else {
+                    $this->importParams( $xml, $value );
                 }
             } else {
-                $requestXml->addChild($key, $val);
+                $xml->addChild( "$key", htmlspecialchars( "$value" ) );
             }
         }
-        return $requestXml;
     }
+
 
     /**
      * Sign XML request
      *
      * @param SimpleXMLElement The XML request
+     *
      * @throws Planfix_API_Exception
      * @return string the Signature
      */
-    protected function signXml($requestXml) {
-        return md5($this->normalizeXml($requestXml).$this->getApiSecret());
+    protected function signXml( $requestXml ) {
+        return md5( $this->normalizeXml( $requestXml ) . $this->getApiSecret() );
     }
 
     /**
      * Normalize the XML request
      *
      * @param SimpleXMLElement $node The XML request
+     *
      * @return string the Normalized string
      */
-    protected function normalizeXml($node) {
+    protected function normalizeXml( $node ) {
         $node = (array) $node;
-        ksort($node);
+        ksort( $node );
 
         $normStr = '';
 
-        foreach ($node as $child) {
-            if (is_array($child)) {
-                $normStr .= implode('', array_map(array($this,'normalizeXml'), $child));
-            } elseif (is_object($child)) {
-                $normStr .= $this->normalizeXml($child);
+        foreach ( $node as $child ) {
+            if ( is_array( $child ) ) {
+                $normStr .= implode( '', array_map( array( $this, 'normalizeXml' ), $child ) );
+            } elseif ( is_object( $child ) ) {
+                $normStr .= $this->normalizeXml( $child );
             } else {
                 $normStr .= (string) $child;
             }
@@ -438,86 +453,89 @@ class Planfix_API {
      * Make the batch request to Api
      *
      * @param array $batch The array of XML requests
+     *
      * @return array the array of Api responses
      */
-    protected function makeBatchRequest($batch) {
+    protected function makeBatchRequest( $batch ) {
         $mh = curl_multi_init();
 
-        $batchCnt = count($batch);
+        $batchCnt = count( $batch );
         $max_size = $batchCnt < self::$MAX_BATCH_SIZE ? $batchCnt : self::$MAX_BATCH_SIZE;
 
         $batchResult = array();
 
-        for ($i = 0; $i < $max_size; $i++) {
-            $requestXml = array_shift($batch);
-            $ch = $this->prepareCurlHandle($requestXml);
-            $chKey = (string) $ch;
-            $batchResult[$chKey] = array();
-            curl_multi_add_handle($mh, $ch);
+        for ( $i = 0; $i < $max_size; $i ++ ) {
+            $requestXml            = array_shift( $batch );
+            $ch                    = $this->prepareCurlHandle( $requestXml );
+            $chKey                 = (string) $ch;
+            $batchResult[ $chKey ] = array();
+            curl_multi_add_handle( $mh, $ch );
         }
 
         do {
             do {
-                $mrc = curl_multi_exec($mh, $running);
-            } while($mrc == CURLM_CALL_MULTI_PERFORM);
+                $mrc = curl_multi_exec( $mh, $running );
+            } while ( $mrc == CURLM_CALL_MULTI_PERFORM );
 
-            while ($request = curl_multi_info_read($mh)) {
-                $ch = $request['handle'];
-                $chKey = (string) $ch;
-                $batchResult[$chKey] = $this->parseApiResponse(curl_multi_getcontent($ch), curl_error($ch));
+            while ( $request = curl_multi_info_read( $mh ) ) {
+                $ch                    = $request['handle'];
+                $chKey                 = (string) $ch;
+                $batchResult[ $chKey ] = $this->parseApiResponse( curl_multi_getcontent( $ch ), curl_error( $ch ) );
 
-                if (count($batch)) {
-                    $requestXml = array_shift($batch);
-                    $ch = $this->prepareCurlHandle($requestXml);
-                    $chKey = (string) $ch;
-                    $batchResult[$chKey] = array();
-                    curl_multi_add_handle($mh, $ch);
+                if ( count( $batch ) ) {
+                    $requestXml            = array_shift( $batch );
+                    $ch                    = $this->prepareCurlHandle( $requestXml );
+                    $chKey                 = (string) $ch;
+                    $batchResult[ $chKey ] = array();
+                    curl_multi_add_handle( $mh, $ch );
                 }
 
-                curl_multi_remove_handle($mh, $ch);
-                curl_close($ch);
+                curl_multi_remove_handle( $mh, $ch );
+                curl_close( $ch );
             }
 
-            if ($running) {
-                curl_multi_select($mh);
+            if ( $running ) {
+                curl_multi_select( $mh );
             }
 
-        } while($running && $mrc == CURLM_OK);
+        } while ( $running && $mrc == CURLM_OK );
 
-        return array_values($batchResult);
+        return array_values( $batchResult );
     }
 
     /**
      * Make the request to Api
      *
      * @param SimpleXMLElement $requestXml The XML request
+     *
      * @return array the Api response
      */
-    protected function makeRequest($requestXml) {
-        $ch = $this->prepareCurlHandle($requestXml);
+    protected function makeRequest( $requestXml ) {
+        $ch = $this->prepareCurlHandle( $requestXml );
 
-        $response = curl_exec($ch);
-        $error = curl_error($ch);
+        $response = curl_exec( $ch );
+        $error    = curl_error( $ch );
 
-        return $this->parseApiResponse($response, $error);
+        return $this->parseApiResponse( $response, $error );
     }
 
     /**
      * Prepare the Curl handle
      *
      * @param SimpleXMLElement $requestXml The XML request
+     *
      * @return resource the Curl handle
      */
-    protected function prepareCurlHandle($requestXml) {
-        $ch = curl_init(self::API_URL);
+    protected function prepareCurlHandle( $requestXml ) {
+        $ch = curl_init( self::API_URL );
 
-        curl_setopt_array($ch, self::$CURL_OPTS);
+        curl_setopt_array( $ch, self::$CURL_OPTS );
 
-        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($ch, CURLOPT_USERPWD, $this->getApiKey().':X');
+        curl_setopt( $ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC );
+        curl_setopt( $ch, CURLOPT_USERPWD, $this->getApiKey() . ':X' );
 
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $requestXml->asXML());
+        curl_setopt( $ch, CURLOPT_POST, 1 );
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, $requestXml->asXML() );
 
         return $ch;
     }
@@ -529,47 +547,51 @@ class Planfix_API {
      *
      * @param string $response The Api response
      * @param string $error The Curl error if any
+     *
      * @return array the Curl handle
      */
-    protected function parseApiResponse($response, $error) {
+    protected function parseApiResponse( $response, $error ) {
         $result = array(
-            'success'    => 1,
-            'error_str'  => '',
-            'meta'       => null,
-            'data'       => null
+            'success'   => 1,
+            'error_str' => '',
+            'meta'      => null,
+            'data'      => null
         );
 
-        if ($error) {
-            $result['success'] = 0;
+        if ( $error ) {
+            $result['success']   = 0;
             $result['error_str'] = $error;
+
             return $result;
         }
 
         try {
-            $responseXml = new SimpleXMLElement($response);
-        } catch (Exception $e) {
-            $result['success'] = 0;
+            $responseXml = new SimpleXMLElement( $response );
+        } catch ( Exception $e ) {
+            $result['success']   = 0;
             $result['error_str'] = $e->getMessage();
+
             return $result;
         }
 
-        if ($responseXml['status'] == 'error') {
-            $result['success'] = 0;
-            $result['error_str'] = 'Code: '.$responseXml->code.' / Message: '.$responseXml->message;
+        if ( $responseXml['status'] == 'error' ) {
+            $result['success']   = 0;
+            $result['error_str'] = 'Code: ' . $responseXml->code . ' / Message: ' . $responseXml->message;
+
             return $result;
         }
 
-        if (isset($responseXml->sid)) {
+        if ( isset( $responseXml->sid ) ) {
             $result['data']['sid'] = (string) $responseXml->sid;
         } else {
             $responseXml = $responseXml->children();
 
-            foreach($responseXml->attributes() as $key => $val) {
-                $result['meta'][$key] = (int) $val;
+            foreach ( $responseXml->attributes() as $key => $val ) {
+                $result['meta'][ $key ] = (int) $val;
             }
 
-            if ($result['meta'] == null || $result['meta']['totalCount'] || $result['meta']['count']) {
-                $result['data'] = $this->exportData($responseXml);
+            if ( $result['meta'] == null || $result['meta']['totalCount'] || $result['meta']['count'] ) {
+                $result['data'] = $this->exportData( $responseXml );
             }
         }
 
@@ -580,27 +602,29 @@ class Planfix_API {
      * Exports the Xml response to array
      *
      * @param SimpleXMLElement $responseXml The Api response
+     *
      * @return array the Exported data
      */
-    protected function exportData($responseXml) {
-        $root = $responseXml->getName();
-        $data[$root] = array();
+    protected function exportData( $responseXml ) {
+        $root          = $responseXml->getName();
+        $data[ $root ] = array();
 
         $rootChildren = $responseXml->children();
 
         $names = array();
-        foreach($rootChildren as $child) {
+        foreach ( $rootChildren as $child ) {
             $names[] = $child->getName();
         }
 
-        $is_duplicate = count(array_unique($names)) != count($names) ? true : false;
-        $grandchildren = $child->children();
+        $is_duplicate = count( array_unique( $names ) ) != count( $names ) ? true : false;
 
-        if ($grandchildren->count() || count($grandchildren) > 1) {
-            if (count($child->children()) > 1) {
-                $data[$root] = array_merge($data[$root], $is_duplicate ? array($this->exportData($child)) : $this->exportData($child));
+        foreach ( $rootChildren as $child ) {
+            $grandchildren = $child->children();
+
+            if ( $grandchildren->count() || count( $grandchildren ) > 1 ) {
+                $data[ $root ] = array_merge( $data[ $root ], $is_duplicate ? array( $this->exportData( $child ) ) : $this->exportData( $child ) );
             } else {
-                $data[$root][$child->getName()] = (string) $child;
+                $data[ $root ][ $child->getName() ] = (string) $child;
             }
         }
 
